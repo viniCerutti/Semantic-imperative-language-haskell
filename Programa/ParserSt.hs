@@ -150,7 +150,8 @@ isLower c = elem c ['a'..'z']
 isUpper c = elem c ['A'..'Z']
 isAlpha = \c -> isLower c || isUpper c
 isAlphaNum = \c -> isAlpha c || isDigit c
-isSpace = \c -> c == ' ' 
+isSpace = \c -> c == ' '
+
 
 
 sat::(Char -> Bool) -> Parser Char
@@ -163,6 +164,7 @@ upper = sat isUpper
 letter = sat isAlpha
 alphaNum = sat isAlphaNum
 matchSpace = sat isSpace
+
 
 char::Char -> Parser Char 
 char x = sat (==x)
@@ -203,6 +205,9 @@ ident = letter >=> \x -> many alphaNum >=> \xs -> returnP (x:xs)
 nat::Parser Integer
 nat = many1 digit >=> \xs -> returnP (read xs)
 
+logic::Parser Bool
+logic = (string("True") >=> \_ -> returnP (True)) +++ (string("False") >=> \exp -> returnP (False))
+
 natS::Parser String
 natS = many1 digit >=> \xs -> returnP xs
 
@@ -228,7 +233,7 @@ identifier:: Parser String
 identifier = token ident 
 
 natural::Parser Integer 
-natural = token nat 
+natural = token nat
 
 symbol:: String -> Parser String 
 symbol xs = token (string xs)
@@ -255,14 +260,20 @@ parNum = (symbol ("(") >=> \_ ->
 -- E ::= (E+E) | (E-E) | (E * E) | Num | Var
 -- parser a) b) c), so que do tipo Parse ArtExp do trabalho 
 
+{-
+	Grammer for parseAriExp
+	parseAritExp -> (parseAritExp foundSymbolArith parseAritExp) | varOrLiteral
+	varOrLiteral -> natural | identifier
+	foundSymbolArith -> "+"|"-"|"/"|"*"|"%"
+-}
 parseAritExp::Parser AritExp
 parseAritExp = (symbol("(") >=> \_ ->
                 parseAritExp>=> \n1 ->
                 foundSymbolArith >=> \op ->
                 parseAritExp >=> \n2 -> 
                 symbol (")") >=> \_ -> 
-                returnP (op n1 n2)) +++ 
-                (natural >=> \n -> returnP (L n)) +++ (identifier >=> \atrib -> returnP (V atrib))
+                returnP (op n1 n2)) +++ (varOrLiteral >=> \n -> returnP n)
+                
   where
       foundSymbolArith::Parser (AritExp -> AritExp -> AritExp) 
       foundSymbolArith = (symbol("+") >=> \_ -> returnP Add) 
@@ -270,7 +281,32 @@ parseAritExp = (symbol("(") >=> \_ ->
                       +++(symbol("/") >=> \_ -> returnP Div) 
                       +++(symbol("*") >=> \_ -> returnP Mult) 
                       +++(symbol("%") >=> \_ -> returnP Mod')
+                      -- faltou tipo absoluto
+      varOrLiteral::Parser AritExp
+      varOrLiteral = (natural >=> \n -> returnP (L n))+++(identifier >=> \atrib -> returnP (V atrib))
 
+{-
+	Grammer for parseLogicExp
+	parseLogicExp -> (parseLogicExp foundLogicSymbol parseLogicExp) | logic | (parseAritExp foundLogArithSym parseAritExp) | "!" parseLogicExp
+	foundLogArithSym -> ">" | "<" | "=="
+	foundLogicSymbol -> "&&" | "||"
+-}
+
+parseLogicExp::Parser BoolExp
+parseLogicExp = (symbol("(") >=> \_ ->
+                parseLogicExp>=> \n1 ->
+                foundSymbolLogic >=> \op ->
+                parseLogicExp >=> \n2 -> 
+                symbol (")") >=> \_ -> 
+                returnP (op n1 n2)) 
+				+++ (logic >=> \n -> returnP (B n)) 
+                +++(symbol ("!") >=> \_ ->
+                parseLogicExp >=> \n1 ->
+                returnP (No n1)) 
+  where
+      foundSymbolLogic::Parser (BoolExp -> BoolExp -> BoolExp) 
+      foundSymbolLogic = (symbol("&&") >=> \_ -> returnP And')
+      				  +++(symbol("||") >=> \_ -> returnP Or')
 {-
 Exercicio:
 
