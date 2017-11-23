@@ -205,9 +205,6 @@ ident = letter >=> \x -> many alphaNum >=> \xs -> returnP (x:xs)
 nat::Parser Integer
 nat = many1 digit >=> \xs -> returnP (read xs)
 
-logic::Parser Bool
-logic = (string("True") >=> \_ -> returnP (True)) +++ (string("False") >=> \exp -> returnP (False))
-
 natS::Parser String
 natS = many1 digit >=> \xs -> returnP xs
 
@@ -299,11 +296,14 @@ parseLogicExp = (symbol("(") >=> \_ ->
                 parseLogicExp >=> \n2 -> 
                 symbol (")") >=> \_ -> 
                 returnP (op n1 n2)) 
-				+++ (logic >=> \n -> returnP (B n)) 
+				        +++ (boolLogic >=> \n -> returnP n) 
                 +++(symbol ("!") >=> \_ ->
                 parseLogicExp >=> \n1 ->
                 returnP (No n1)) 
   where
+      boolLogic::Parser BoolExp
+      boolLogic = (symbol ("true") >=> \_ -> returnP (B True))
+                  +++ (symbol ("false") >=> \_ -> returnP (B False))
       foundSymbolLogic::Parser (BoolExp -> BoolExp -> BoolExp) 
       foundSymbolLogic = (symbol("&&") >=> \_ -> returnP And')
       				  +++(symbol("||") >=> \_ -> returnP Or')
