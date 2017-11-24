@@ -284,7 +284,7 @@ parseAritExp = (symbol("(") >=> \_ ->
 
 {-
 	Grammer for parseLogicExp
-	parseLogicExp -> (parseLogicExp foundLogicSymbol parseLogicExp) | logic | (parseAritExp foundLogArithSym parseAritExp) | "!" parseLogicExp
+	parseLogicExp -> (parseLogicExp foundLogicSymbol parseLogicExp) | boolLogic | (parseAritExp foundLogArithSym parseAritExp) | "!" parseLogicExp
 	foundLogArithSym -> ">" | "<" | "=="
 	foundLogicSymbol -> "&&" | "||"
 -}
@@ -296,7 +296,13 @@ parseLogicExp = (symbol("(") >=> \_ ->
                 parseLogicExp >=> \n2 -> 
                 symbol (")") >=> \_ -> 
                 returnP (op n1 n2)) 
-				        +++ (boolLogic >=> \n -> returnP n) 
+				+++ (boolLogic >=> \n -> returnP n) 
+				+++(symbol("(") >=> \_ ->
+				parseAritExp >=> \n1 ->
+				foundLogArithSym >=> \op -> 
+				parseAritExp >=> \n2 -> 
+				symbol (")") >=> \_ ->
+				returnP (op n1 n2))
                 +++(symbol ("!") >=> \_ ->
                 parseLogicExp >=> \n1 ->
                 returnP (No n1)) 
@@ -304,9 +310,16 @@ parseLogicExp = (symbol("(") >=> \_ ->
       boolLogic::Parser BoolExp
       boolLogic = (symbol ("true") >=> \_ -> returnP (B True))
                   +++ (symbol ("false") >=> \_ -> returnP (B False))
+                  
       foundSymbolLogic::Parser (BoolExp -> BoolExp -> BoolExp) 
       foundSymbolLogic = (symbol("&&") >=> \_ -> returnP And')
       				  +++(symbol("||") >=> \_ -> returnP Or')
+      
+      foundLogArithSym::Parser (AritExp -> AritExp -> BoolExp) 
+      foundLogArithSym = (symbol(">") >=> \_ -> returnP Great)
+      				  +++(symbol("<") >=> \_ -> returnP Less)
+					  +++(symbol("==") >=> \_ -> returnP Equal)
+					  
 {-
 Exercicio:
 
