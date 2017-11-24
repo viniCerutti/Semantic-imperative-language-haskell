@@ -296,13 +296,13 @@ parseLogicExp = (symbol("(") >=> \_ ->
                 parseLogicExp >=> \n2 -> 
                 symbol (")") >=> \_ -> 
                 returnP (op n1 n2)) 
-				+++ (boolLogic >=> \n -> returnP n) 
-				+++(symbol("(") >=> \_ ->
-				parseAritExp >=> \n1 ->
-				foundLogArithSym >=> \op -> 
-				parseAritExp >=> \n2 -> 
-				symbol (")") >=> \_ ->
-				returnP (op n1 n2))
+        				+++ (boolLogic >=> \n -> returnP n) 
+        				+++(symbol("(") >=> \_ ->
+        				parseAritExp >=> \n1 ->
+        				foundLogArithSym >=> \op -> 
+        				parseAritExp >=> \n2 -> 
+        				symbol (")") >=> \_ ->
+        				returnP (op n1 n2))
                 +++(symbol ("!") >=> \_ ->
                 parseLogicExp >=> \n1 ->
                 returnP (No n1)) 
@@ -317,9 +317,54 @@ parseLogicExp = (symbol("(") >=> \_ ->
       
       foundLogArithSym::Parser (AritExp -> AritExp -> BoolExp) 
       foundLogArithSym = (symbol(">") >=> \_ -> returnP Great)
-      				  +++(symbol("<") >=> \_ -> returnP Less)
-					  +++(symbol("==") >=> \_ -> returnP Equal)
-					  
+            				  +++(symbol("<") >=> \_ -> returnP Less)
+      					      +++(symbol("==") >=> \_ -> returnP Equal)
+
+parseCommands::Parser Commands
+parseCommands = (atrib >=> \atrib ->
+                     returnP atrib)
+                  +++ (while >=> \while -> 
+                      returnP while)
+                  +++ (doWhile >=> \doWhile ->
+                       returnP doWhile)
+                  +++ (choice >=> \choice ->
+                       returnP choice)
+                  +++ returnP Nop
+    where
+      atrib::Parser Commands
+      atrib = (identifier >=> \name -> symbol(":=") >=> \_ -> parseAritExp >=> \exp -> returnP (Atrib name exp))
+      while::Parser Commands
+      while = (symbol("while") >=> \_ ->
+              parseLogicExp >=> \expBool ->
+              symbol("do") >=> \_ ->
+              parseCommands >=> \comd ->
+              symbol("od") >=> \_ ->
+              returnP (While expBool comd))
+
+      doWhile::Parser Commands
+      doWhile = (symbol("do") >=> \_ ->
+                parseCommands >=> \comd ->
+                symbol("while") >=> \_ ->
+                parseLogicExp >=> \expBool ->
+                symbol("od") >=> \_ ->
+                returnP (Dowhile comd expBool))
+
+      choice::Parser Commands
+      choice = (symbol("if") >=> \_ ->
+                parseLogicExp >=> \expBool ->
+                symbol("then") >=> \_ ->
+                parseCommands >=> \comd1 ->
+                symbol("else") >=> \_ ->
+                parseCommands >=> \comd2 ->
+                symbol("fi") >=> \_ ->
+                returnP(Choice expBool comd1 comd2))
+                +++(symbol("if") >=> \_ ->
+                parseLogicExp >=> \expBool ->
+                symbol("then") >=> \_ ->
+                parseCommands >=> \comd ->
+                symbol("fi") >=> \_ ->
+                returnP(Choice expBool comd Nop))
+
 {-
 Exercicio:
 
@@ -339,7 +384,19 @@ parseLNat = (symbol ("[") >=> \_ ->
     A -> Num B
     B -> & | , Num B
 -}
-
+s1:: Parser[Integer]
+s1 = (symbol ("[") >=> \_ -> 
+      a >=> \n -> symbol ("]") >=> \_ -> 
+      returnP n)
+    where
+      a = (natural >=> \n ->
+          b >=> \rst ->
+          returnP (n:rst))
+      b = (symbol(",") >=> \_ ->
+          natural >=> \n ->
+          b >=> \rst ->
+          returnP (n:rst))
+          +++ returnP []
      
  
 recInteger::Parser Integer
