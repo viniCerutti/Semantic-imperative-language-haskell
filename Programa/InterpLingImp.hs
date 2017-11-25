@@ -9,16 +9,11 @@ module InterpLingImp where
 import AvalLing
 import ParserSt
 import StoreGen
-import Data.List
 
 run:: String -> Store Var ValueVar -> IO()
 run string memory = pretty_printing progAfterParse memory
     where
         progAfterParse = fst (head(parseProgram (string)))
-
-memory = initial
-
-fatorial = "base:=3; expoente:=2; resultado:=1; while (expoente > 0) do resultado:=(base*resultado); expoente:= (expoente-1) od"
 
 -- Funcao para imprimir os valores das variaveis que foram
 -- executados durante do programa, onde a impressao informa
