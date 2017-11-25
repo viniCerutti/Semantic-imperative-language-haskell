@@ -321,15 +321,11 @@ parseLogicExp = (symbol("(") >=> \_ ->
       					      +++(symbol("==") >=> \_ -> returnP Equal)
 
 parseCommands::Parser Commands
-parseCommands = (atrib >=> \atrib ->
-                     returnP atrib)
-                  +++ (while >=> \while -> 
-                      returnP while)
-                  +++ (doWhile >=> \doWhile ->
-                       returnP doWhile)
-                  +++ (choice >=> \choice ->
-                       returnP choice)
-                  +++ returnP Nop
+parseCommands =   (atrib >=> \atrib -> returnP atrib)
+                  +++(while >=> \while -> returnP while)
+                  +++(doWhile >=> \doWhile -> returnP doWhile)
+                  +++(choice >=> \choice -> returnP choice)
+                  +++(returnP Nop)
     where
       atrib::Parser Commands
       atrib = (identifier >=> \name -> symbol(":=") >=> \_ -> parseAritExp >=> \exp -> returnP (Atrib name exp))
@@ -337,13 +333,13 @@ parseCommands = (atrib >=> \atrib ->
       while = (symbol("while") >=> \_ ->
               parseLogicExp >=> \expBool ->
               symbol("do") >=> \_ ->
-              parseCommands >=> \comd ->
+              parseProgram >=> \comd ->
               symbol("od") >=> \_ ->
               returnP (While expBool comd))
 
       doWhile::Parser Commands
       doWhile = (symbol("do") >=> \_ ->
-                parseCommands >=> \comd ->
+                parseProgram >=> \comd ->
                 symbol("while") >=> \_ ->
                 parseLogicExp >=> \expBool ->
                 symbol("od") >=> \_ ->
@@ -353,17 +349,25 @@ parseCommands = (atrib >=> \atrib ->
       choice = (symbol("if") >=> \_ ->
                 parseLogicExp >=> \expBool ->
                 symbol("then") >=> \_ ->
-                parseCommands >=> \comd1 ->
+                parseProgram >=> \comd1 ->
                 symbol("else") >=> \_ ->
-                parseCommands >=> \comd2 ->
+                parseProgram >=> \comd2 ->
                 symbol("fi") >=> \_ ->
                 returnP(Choice expBool comd1 comd2))
                 +++(symbol("if") >=> \_ ->
                 parseLogicExp >=> \expBool ->
                 symbol("then") >=> \_ ->
-                parseCommands >=> \comd ->
+                parseProgram >=> \comd ->
                 symbol("fi") >=> \_ ->
                 returnP(Choice expBool comd Nop))
+
+parseProgram::Parser Commands
+parseProgram = (parseCommands >=> \comd1 ->
+               symbol(";") >=> \_ ->
+               parseProgram >=> \comd2 ->
+               returnP (Seq comd1 comd2))
+               +++(parseCommands >=> \comd -> returnP comd)
+
 
 {-
 Exercicio:
