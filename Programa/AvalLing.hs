@@ -18,10 +18,10 @@ type ValueVar = Integer
 
 -- Data que guarda as operacoes aritmeticas
 
-data AritExp =  L ValueVar                | Sub AritExp AritExp |
+data AritExp =  L ValueVar               | Sub AritExp AritExp |
                 Add AritExp AritExp      | Mult AritExp AritExp|
                 Div AritExp AritExp      | Mod' AritExp AritExp|
-                Abs' AritExp             | V Var  deriving (Show,Eq,Ord)
+                V Var  deriving (Show,Eq,Ord)
             
 -- Data que guarda as operacoes logicas
 
@@ -29,7 +29,8 @@ data BoolExp =  B Bool                | No BoolExp          |
                 And' BoolExp BoolExp  | Or' BoolExp BoolExp |
                 Great AritExp AritExp | Less AritExp AritExp|
                 Equal AritExp AritExp  deriving (Show,Eq,Ord)
-                
+ 
+
 -- Data que guarda os comandos para nossa lingugagem
 
 data Commands = Nop                          | Atrib Var AritExp                |
@@ -46,7 +47,6 @@ evalAritExp (Add exp1 exp2) store = (evalAritExp exp1 store) + (evalAritExp exp2
 evalAritExp (Mult exp1 exp2) store = (evalAritExp exp1 store) * (evalAritExp exp2 store)
 evalAritExp (Div exp1 exp2) store  = (evalAritExp exp1 store) `div` (evalAritExp exp2 store) 
 evalAritExp (Mod' exp1 exp2) store = (evalAritExp exp1 store) `mod` (evalAritExp exp2 store)
-evalAritExp (Abs' exp1) store = abs (evalAritExp exp1 store) 
 
 -- Fucao que avalia (evaluate) as expressoes logicas
 
