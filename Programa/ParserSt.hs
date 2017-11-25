@@ -1,7 +1,6 @@
 module ParserSt where
 
-import InterpLingImpHaskell
-import StoreGen
+import AvalLing
 {-
 Um parser é um programa que toma um string de caracteres e produz alguma fo
 de árvore que torna explícita a estrutura sintática de um string.
