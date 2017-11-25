@@ -9,6 +9,7 @@ module InterpLingImp where
 import AvalLing
 import ParserSt
 import StoreGen
+import Data.List
 
 run:: String -> Store Var ValueVar -> IO()
 run string memory = pretty_printing progAfterParse memory
