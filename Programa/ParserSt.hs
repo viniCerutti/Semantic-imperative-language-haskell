@@ -259,7 +259,7 @@ parNum = (symbol ("(") >=> \_ ->
 {-
 	Grammer for parseAriExp
 	parseAritExp -> (parseAritExp foundSymbolArith parseAritExp) | varOrLiteral
-	varOrLiteral -> natural | identifier
+	varOrLiteral -> recInteger | identifier
 	foundSymbolArith -> "+"|"-"|"/"|"*"|"%"
 -}
 parseAritExp::Parser AritExp
@@ -279,7 +279,7 @@ parseAritExp = (symbol("(") >=> \_ ->
                       +++(symbol("%") >=> \_ -> returnP Mod')
                       -- faltou tipo absoluto
       varOrLiteral::Parser AritExp
-      varOrLiteral = (natural >=> \n -> returnP (L n))+++(identifier >=> \atrib -> returnP (V atrib))
+      varOrLiteral = (recInteger >=> \n -> returnP (L n))+++(identifier >=> \atrib -> returnP (V atrib))
 
 {-
 	Grammer for parseLogicExp
@@ -302,8 +302,10 @@ parseLogicExp = (symbol("(") >=> \_ ->
         				parseAritExp >=> \n2 -> 
         				symbol (")") >=> \_ ->
         				returnP (op n1 n2))
-                +++(symbol ("!") >=> \_ ->
-                parseLogicExp >=> \n1 ->
+                +++(symbol("(") >=> \_ ->
+                  symbol ("!") >=> \_ ->
+                  parseLogicExp >=> \n1 ->
+                  symbol (")") >=> \_ ->
                 returnP (No n1)) 
   where
       boolLogic::Parser BoolExp
@@ -366,7 +368,6 @@ parseProgram = (parseCommands >=> \comd1 ->
                parseProgram >=> \comd2 ->
                returnP (Seq comd1 comd2))
                +++(parseCommands >=> \comd -> returnP comd)
-
 
 {-
 Exercicio:
