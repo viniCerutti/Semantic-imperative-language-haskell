@@ -1,3 +1,10 @@
+{-
+    T2 - Programacao Funcional 2017/2
+    Vinicius Cerutti
+    Dimas Olympio
+-}
+
+
 module ParserSt where
 
 import AvalLing
@@ -77,45 +84,10 @@ p >=> f = \s -> case parse p s of
 	              []-> [] 
 	              [(v,out)]-> parse (f v) out
 
-
-
-
 par01 :: Parser(Char,Char)
 par01 = item >=> \v1 -> 
         item >=> \v2 -> returnP (v1,v2)
         
-        {-
-    f = \v1 -> item >=> \v2 -> returnP (v1,v2)
-    g= \v2 -> returnP('h',v2)
-    parse par01 "hello"
-    = par01 "hello" (def. parse)
-    = (item >=> f) "hello" (def. parse01 e f)
-    = (\s -> case parse item s of 
-      []  -> []
-      [(v,out)] -> parse (f v) out) "hello"  (def >=>)
-    = case parse item "hello" of 
-    [] -> []
-    [(v,out)] -> parse (f v ) out 
-    =  case [('h', "ello")]  of
-    [] -> []
-    [(v,out)] -> parse (f v ) out 
-    = parse (f 'h')  "ello"  (def. >=> e parse item "hello"=['h',"ello"])
-    = parse (item >=> \v2 -> returnP('h',v2))  "ello" (def de f e aplicação)
-    = (item >=> \v2 -> returnP('h',v2))  "ello"  (def. parse)
-    =  (\s -> case parse item s of 
-      []  -> []
-      [(v,out)] -> parse (g v) out) "ello"  (def >=>)
-    =  case parse item "ello" of 
-      []  -> []
-      [(v,out)] -> parse (g v) out 
-    =   case [('e',"llo")] of 
-    []  -> []
-    [(v,out)] -> parse (g v) out 
-    = parse (g 'e')  "llo"
-    = parse (returnP('h','e')) "llo"
-    = returnP ('h','e') "llo"
-    = [(('h','e'),"llo")]
--}
 par02 = item >=> \v1 -> 
         item >=> \v2 -> 
         item >=> \v3 -> returnP(v1,v2,v3)
@@ -235,29 +207,17 @@ symbol:: String -> Parser String
 symbol xs = token (string xs)
 
 
---javaId::Parser String
---javaId = (letter +++ underSc) >=> \c ->
---         (many (alphaNum +++ underSc)) >=> \xs ->
---        returnP (c:xs)
-
-
--- E := (E+E) | num 
-parNum::Parser Integer
-parNum = (symbol ("(") >=> \_ -> 
-    parNum >=> \n1 -> 
-    symbol ("+") >=> \_ ->
-    parNum >=> \n2 -> 
-    symbol (")") >=> \_ -> 
-    returnP (n1+n2)) +++ (natural >=> \n -> returnP n)
-    
--- E ::= (E+E) | (E-E) | (E * E) | Num ou E::= (E bop E) | Num
-
-
--- E ::= (E+E) | (E-E) | (E * E) | Num | Var
--- parser a) b) c), so que do tipo Parse ArtExp do trabalho 
+recInteger::Parser Integer
+recInteger = (natural >=> \n -> returnP n) 
+                +++ 
+            (symbol("(") >=> \_ -> 
+            symbol("-") >=> \_ -> 
+            natural >=> \n  -> 
+            symbol(")") >=> \_ -> 
+            returnP ((-n)))
 
 {-
-	Grammer for parseAriExp
+	grammar for parseAriExp
 	parseAritExp -> (parseAritExp foundSymbolArith parseAritExp) | varOrLiteral
 	varOrLiteral -> recInteger | identifier
 	foundSymbolArith -> "+"|"-"|"/"|"*"|"%"
@@ -282,8 +242,8 @@ parseAritExp = (symbol("(") >=> \_ ->
       varOrLiteral = (recInteger >=> \n -> returnP (L n))+++(identifier >=> \atrib -> returnP (V atrib))
 
 {-
-	Grammer for parseLogicExp
-	parseLogicExp -> (parseLogicExp foundLogicSymbol parseLogicExp) | boolLogic | (parseAritExp foundLogArithSym parseAritExp) | "!" parseLogicExp
+	grammar for parseLogicExp
+	parseLogicExp -> (parseLogicExp foundLogicSymbol parseLogicExp) | boolLogic | (parseAritExp foundLogArithSym parseAritExp) | ("!" parseLogicExp)
 	foundLogArithSym -> ">" | "<" | "=="
 	foundLogicSymbol -> "&&" | "||"
 -}
@@ -320,6 +280,25 @@ parseLogicExp = (symbol("(") >=> \_ ->
       foundLogArithSym = (symbol(">") >=> \_ -> returnP Great)
             				  +++(symbol("<") >=> \_ -> returnP Less)
       					      +++(symbol("==") >=> \_ -> returnP Equal)
+
+
+{-
+	grammar for parseProgram 
+	parseProgram -> parseCommands ";" parseProgram | parseCommands
+	parseCommands -> atrib | while | doWhile | choice
+	atrib -> identifier ":=" parseAritExp
+	while -> "while" parseLogicExp "do" parseProgram "od"
+	doWhile -> "do" parseProgram "while" parseLogicExp "od"
+	choice -> "if" parseLogicExp "then" parseProgram "else" parseProgram "fi"| "if" parseLogicExp "then" parseProgram "fi"
+-}
+
+parseProgram::Parser Commands
+parseProgram = (parseCommands >=> \comd1 ->
+               symbol(";") >=> \_ ->
+               parseProgram >=> \comd2 ->
+               returnP (Seq comd1 comd2))
+               +++(parseCommands >=> \comd -> returnP comd)
+
 
 parseCommands::Parser Commands
 parseCommands =   (atrib >=> \atrib -> returnP atrib)
@@ -361,54 +340,4 @@ parseCommands =   (atrib >=> \atrib -> returnP atrib)
                 parseProgram >=> \comd ->
                 symbol("fi") >=> \_ ->
                 returnP(Choice expBool comd Nop))
-
-parseProgram::Parser Commands
-parseProgram = (parseCommands >=> \comd1 ->
-               symbol(";") >=> \_ ->
-               parseProgram >=> \comd2 ->
-               returnP (Seq comd1 comd2))
-               +++(parseCommands >=> \comd -> returnP comd)
-
-{-
-Exercicio:
-
-Um parser para uma lista de naturais, onde espaços ocorrem livremente
-antes e depois do colchentes, dos números e das vírgulas.
-
-parseLNat " [ 1 , 234  , 56 ] " = [([1,234,56],"")]
--}
-parseLNat::Parser [Integer]
-parseLNat = (symbol ("[") >=> \_ ->
-        natural >=> \n ->
-        many(symbol(",") >=>  \_ -> natural) >=> \n2 ->
-        symbol ("]") >=> \_ -> returnP(n:n2))
-
-{-
-    S1 -> [A]
-    A -> Num B
-    B -> & | , Num B
--}
-s1:: Parser[Integer]
-s1 = (symbol ("[") >=> \_ -> 
-      a >=> \n -> symbol ("]") >=> \_ -> 
-      returnP n)
-    where
-      a = (natural >=> \n ->
-          b >=> \rst ->
-          returnP (n:rst))
-      b = (symbol(",") >=> \_ ->
-          natural >=> \n ->
-          b >=> \rst ->
-          returnP (n:rst))
-          +++ returnP []
-     
- 
-recInteger::Parser Integer
-recInteger = (natural >=> \n -> returnP n) 
-                +++ 
-            (symbol("(") >=> \_ -> 
-            symbol("-") >=> \_ -> 
-            natural >=> \n  -> 
-            symbol(")") >=> \_ -> 
-            returnP ((-n)))
 
