@@ -57,8 +57,8 @@ faiex01 = failure "hello"
 -- fracassa se o string é vazio. Do contrário, retorna o primeiro caracter.
 item::Parser Char
 item = \s -> case s of 
-	           "" -> []
-	           (x:xs) -> [(x,xs)]
+               "" -> []
+               (x:xs) -> [(x,xs)]
 
 itex01 = item "hello"
 
@@ -81,8 +81,8 @@ parex03 = parse failure "Hello"
 
 (>=>)::Parser a -> (a -> Parser b) -> Parser b
 p >=> f = \s -> case parse p s of 
-	              []-> [] 
-	              [(v,out)]-> parse (f v) out
+                  []-> [] 
+                  [(v,out)]-> parse (f v) out
 
 par01 :: Parser(Char,Char)
 par01 = item >=> \v1 -> 
@@ -104,8 +104,8 @@ este falha, então aplica o segundo.
 
 (+++):: Parser a -> Parser a -> Parser a 
 p +++ q = \s -> case parse p s of 
-	             [] ->  parse q s 
-	             [(v,out)] -> [(v,out)]
+                 [] ->  parse q s 
+                 [(v,out)] -> [(v,out)]
 
 exch01 = parse (item +++ returnP 'd') "abc"
 exch02 = parse (failure +++ returnP 'd') "abc"
@@ -217,10 +217,10 @@ recInteger = (natural >=> \n -> returnP n)
             returnP ((-n)))
 
 {-
-	grammar for parseAriExp
-	parseAritExp -> (parseAritExp foundSymbolArith parseAritExp) | varOrLiteral
-	varOrLiteral -> recInteger | identifier
-	foundSymbolArith -> "+"|"-"|"/"|"*"|"%"
+    grammar for parseAriExp
+    parseAritExp -> (parseAritExp foundSymbolArith parseAritExp) | varOrLiteral
+    varOrLiteral -> recInteger | identifier
+    foundSymbolArith -> "+"|"-"|"/"|"*"|"%"
 -}
 parseAritExp::Parser AritExp
 parseAritExp = (symbol("(") >=> \_ ->
@@ -242,10 +242,10 @@ parseAritExp = (symbol("(") >=> \_ ->
       varOrLiteral = (recInteger >=> \n -> returnP (L n))+++(identifier >=> \atrib -> returnP (V atrib))
 
 {-
-	grammar for parseLogicExp
-	parseLogicExp -> (parseLogicExp foundLogicSymbol parseLogicExp) | boolLogic | (parseAritExp foundLogArithSym parseAritExp) | ("!" parseLogicExp)
-	foundLogArithSym -> ">" | "<" | "=="
-	foundLogicSymbol -> "&&" | "||"
+    grammar for parseLogicExp
+    parseLogicExp -> (parseLogicExp foundLogicSymbol parseLogicExp) | boolLogic | (parseAritExp foundLogArithSym parseAritExp) | ("!" parseLogicExp)
+    foundLogArithSym -> ">" | "<" | "=="
+    foundLogicSymbol -> "&&" | "||"
 -}
 
 parseLogicExp::Parser BoolExp
@@ -255,13 +255,13 @@ parseLogicExp = (symbol("(") >=> \_ ->
                 parseLogicExp >=> \n2 -> 
                 symbol (")") >=> \_ -> 
                 returnP (op n1 n2)) 
-        				+++ (boolLogic >=> \n -> returnP n) 
-        				+++(symbol("(") >=> \_ ->
-        				parseAritExp >=> \n1 ->
-        				foundLogArithSym >=> \op -> 
-        				parseAritExp >=> \n2 -> 
-        				symbol (")") >=> \_ ->
-        				returnP (op n1 n2))
+                        +++ (boolLogic >=> \n -> returnP n) 
+                        +++(symbol("(") >=> \_ ->
+                        parseAritExp >=> \n1 ->
+                        foundLogArithSym >=> \op -> 
+                        parseAritExp >=> \n2 -> 
+                        symbol (")") >=> \_ ->
+                        returnP (op n1 n2))
                 +++(symbol("(") >=> \_ ->
                   symbol ("!") >=> \_ ->
                   parseLogicExp >=> \n1 ->
@@ -274,22 +274,22 @@ parseLogicExp = (symbol("(") >=> \_ ->
                   
       foundSymbolLogic::Parser (BoolExp -> BoolExp -> BoolExp) 
       foundSymbolLogic = (symbol("&&") >=> \_ -> returnP And')
-      				  +++(symbol("||") >=> \_ -> returnP Or')
+                        +++(symbol("||") >=> \_ -> returnP Or')
       
       foundLogArithSym::Parser (AritExp -> AritExp -> BoolExp) 
       foundLogArithSym = (symbol(">") >=> \_ -> returnP Great)
-            				  +++(symbol("<") >=> \_ -> returnP Less)
-      					      +++(symbol("==") >=> \_ -> returnP Equal)
+                              +++(symbol("<") >=> \_ -> returnP Less)
+                                +++(symbol("==") >=> \_ -> returnP Equal)
 
 
 {-
-	grammar for parseProgram 
-	parseProgram -> parseCommands ";" parseProgram | parseCommands
-	parseCommands -> atrib | while | doWhile | choice
-	atrib -> identifier ":=" parseAritExp
-	while -> "while" parseLogicExp "do" parseProgram "od"
-	doWhile -> "do" parseProgram "while" parseLogicExp "od"
-	choice -> "if" parseLogicExp "then" parseProgram "else" parseProgram "fi"| "if" parseLogicExp "then" parseProgram "fi"
+    grammar for parseProgram 
+    parseProgram -> parseCommands ";" parseProgram | parseCommands
+    parseCommands -> atrib | while | doWhile | choice
+    atrib -> identifier ":=" parseAritExp
+    while -> "while" parseLogicExp "do" parseProgram "od"
+    doWhile -> "do" parseProgram "while" parseLogicExp "od"
+    choice -> "if" parseLogicExp "then" parseProgram "else" parseProgram "fi"| "if" parseLogicExp "then" parseProgram "fi"
 -}
 
 parseProgram::Parser Commands
