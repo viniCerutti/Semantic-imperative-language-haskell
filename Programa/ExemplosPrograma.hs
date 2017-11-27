@@ -22,7 +22,7 @@ import StoreGen
     }
 -}
 
-fatorial = "num:=4; result:=1; while (num>0) do result:= (result*num); num:=(num-1) od"
+fatorial = "result:=1; while (num>0) do result:= (result*num); num:=(num-1) od"
 memoryFat = initial
 
 {-
@@ -46,7 +46,7 @@ memoryFat = initial
 
 -}
 
-multiplicacao = "num1:=(-4); num2:=3; result:= 0; if ((num1 > 0) || (num1 == 0))"++ 
+multiplicacao = "result:= 0; if ((num1 > 0) || (num1 == 0))"++ 
 				"then while (num1 > 0) do result:=(result+num2); num1:=(num1-1) od else"++
 				"do result:=(result-num2); num1:=(num1+1) while (num1 < 0) od fi"
 
@@ -66,7 +66,7 @@ memoryMult = initial
      }
 -}
 
-potencia = "base:=(-3); expoente:=2; result:=1; while (expoente > 0) do result:=(base * result); expoente:=(expoente-1) od"
+potencia = "result:=1; while (expoente > 0) do result:=(base * result); expoente:=(expoente-1) od"
 
 memoryPot = initial
 
@@ -81,14 +81,14 @@ memoryPot = initial
      result = num1/num2;
 -}
 
-divisao = "num1:=12; num2:=3; result:=0; result:=(num1/num2);"
+divisao = "result:=0; result:=(num1/num2);"
 memoryDiv = initial
 
 
 {-
     Programa 05: Calculo do MDC (maximo divisor comum)
     Foi utilizado o algoritmo de euclides
-    
+     
     Em outra lingugem de programacao
 
    int num1=12, num2 = 4;
@@ -98,7 +98,9 @@ memoryDiv = initial
        num2 = num1 % num2;
        num1 = temp;
     }
+
+    // resultado fica salvo em num1
 -}
 
-mdc = "num1:=12; num2:=16; while (!(num2==0)) do temp:=num2; num2:=(num1%num2); num1:=temp od"
+mdc = "while (!(num2==0)) do temp:=num2; num2:=(num1%num2); num1:=temp od"
 memoryMdc = initial
