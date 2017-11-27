@@ -1,5 +1,5 @@
 {-
-    T1 - Programacao Funcional 2017/2
+    T2 - Programacao Funcional 2017/2
     Vinicius Cerutti
     Dimas Olympio
 -}
@@ -10,6 +10,8 @@ import AvalLing
 import ParserSt
 import StoreGen
 import Data.List
+
+--  Fucao que executa o programa
 
 run:: String -> Store Var ValueVar -> IO()
 run string memory = pretty_printing progAfterParse memory
