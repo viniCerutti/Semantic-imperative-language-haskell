@@ -1,14 +1,14 @@
 # T2 - Programação Funcional #
-# Descrição #
+## Descrição ##
 
 Trabalho II da Disciplina Programação Funcional - 2017/2 PUCRS Ministrada pelo professor Alfio Martini. Com objetivo de dar continuidade ao [trabalho I](https://github.com/viniCerutti/T1-Programacao-Funcional) que foi definido uma semântica para linguagem de programação imperativa. Neste segundo trabalho foi definido uma sintaxe para linguagem imperativa que compute algoritmos sobre inteiros com a linguagem Haskell. A linguagem deve ter comandos para modelar atribuição, sequência, escolha, comando neutro (que não faz nada), e pelo menos dois tipos de comandos para laços.
 
-# Autores #
+## Autores ##
 Dimas Olympio
 
 Vinicius Cerutti
 
-# Sobre os Arquivos #
+## Sobre os Arquivos ##
 ### Programa (Pasta) ###
 Pasta que contem os arquivos para executar o programa onde:
 * AvalLing.hs - São os datatypes que definem a semântica e os avaliadores que os executam.
@@ -20,5 +20,5 @@ Pasta que contem os arquivos para executar o programa onde:
  ### EnunciadoTarefa.pdf (arquivo Pdf) ###
  Enunciado do trabalho.
  
- # Programa para compilar e executar o Haskell #
+ ## Programa para compilar e executar o Haskell ##
  [GHCI 8.2.2](https://www.haskell.org/platform/)
