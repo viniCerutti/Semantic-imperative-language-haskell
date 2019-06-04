@@ -1,4 +1,4 @@
-# T2 - Programação Funcional #
+# Semantic imperative language Haskell #
 ## Descrição ##
 
 Trabalho II da Disciplina Programação Funcional - 2017/2 PUCRS com objetivo de dar continuidade ao [trabalho I](https://github.com/viniCerutti/T1-Programacao-Funcional) que foi definido uma semântica para linguagem de programação imperativa. Neste segundo trabalho foi definido uma sintaxe para linguagem imperativa. A linguagem deve ter comandos para modelar atribuição, sequência, escolha, comando neutro (que não faz nada), e pelo menos dois tipos de comandos para laços.
